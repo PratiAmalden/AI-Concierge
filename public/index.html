@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f6f2">
+    <meta name="description" content="Chat with the CodeYourFuture learning concierge.">
+    <title>CYF Concierge</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <main class="chat-app">
+      <header class="chat-header">
+        <span class="brand-mark" aria-hidden="true">CYF</span>
+        <h1>CYF Concierge</h1>
+      </header>
+
+      <section class="chat-panel" aria-label="Conversation with the CYF concierge">
+        <div id="conversation" class="conversation" role="log" aria-live="polite" aria-relevant="additions">
+          <article class="message assistant-message">
+            <span class="message-label">Concierge</span>
+            <p>Hi! What would you like help with?</p>
+          </article>
+        </div>
+        <div id="notice" class="notice" role="status" aria-live="polite"></div>
+        <form id="chat-form" class="composer">
+          <label class="visually-hidden" for="message-input">Your message</label>
+          <textarea id="message-input" name="message" rows="1" maxlength="4000" placeholder="Message the concierge" required></textarea>
+          <button class="send-button" type="submit" aria-label="Send message" title="Send message">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+              <path d="M4 12h15M13 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </form>
+        <p class="privacy-note">Messages are redacted before processing by Google Gemini. Please don't share sensitive information.</p>
+      </section>
+    </main>
+  </body>
+</html>
