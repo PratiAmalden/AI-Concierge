@@ -13,13 +13,30 @@ export interface ModelAssessment {
 	readonly handoff: boolean;
 }
 
-/** Sends uncertain, out-of-scope, or explicitly escalated answers to human support. */
+/** Explains why a model assessment is routed to the fixed human-support reply. */
+export function getAssessmentFallbackReasons(assessment: ModelAssessment): string[] {
+	const reasons: string[] = [];
+	if (assessment.handoff) reasons.push("model_requested_handoff");
+	if (assessment.topic === "outside-scope") reasons.push("topic_outside_scope");
+	if (!Number.isFinite(assessment.confidence)) reasons.push("invalid_confidence");
+	else if (assessment.confidence < CONFIDENCE_THRESHOLD) reasons.push("confidence_below_threshold");
+	return reasons;
+}
+
+/** Logs a structured fallback diagnostic without logging user or model text. */
+export function logFallback(
+	reasons: string | readonly string[],
+	details: Readonly<Record<string, unknown>> = {},
+): void {
+	console.warn("[concierge:fallback]", {
+		reasons: typeof reasons === "string" ? [reasons] : reasons,
+		...details,
+	});
+}
+
+/** Routes uncertain, unsafe, or out-of-scope answers to support. */
 export function routeAssessment(assessment: ModelAssessment): ConciergeReply {
-	if (
-		assessment.handoff ||
-		assessment.topic === "outside-scope" ||
-		assessment.confidence < CONFIDENCE_THRESHOLD
-	) {
+	if (getAssessmentFallbackReasons(assessment).length > 0) {
 		return {
 			reply: HUMAN_HANDOFF_REPLY,
 			confidence: assessment.confidence,
