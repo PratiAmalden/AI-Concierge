@@ -1,11 +1,11 @@
 export interface RedactionResult {
   readonly text: string;
   readonly redacted: boolean;
-  readonly categories: readonly ("email" | "phone" | "name")[];
+  readonly categories: readonly ("email" | "phone" | "name" | "financial")[];
 }
 
 const PII_PATTERNS: ReadonlyArray<{
-  readonly category: "email" | "phone" | "name";
+  readonly category: "email" | "phone" | "name" | "financial";
   readonly pattern: RegExp;
   readonly replacement: string;
 }> = [
@@ -14,6 +14,11 @@ const PII_PATTERNS: ReadonlyArray<{
     category: "email",
     pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
     replacement: "[REDACTED EMAIL]",
+  },
+  {
+    category: "financial",
+    pattern: /[£€$]\s?\d[\d,]*(?:\.\d{1,2})?\s?(?:k|m)?(?:\s*(?:\/|per\s+)(?:year|yr|month|mo|annum|yearly|monthly))?/gi,
+    replacement: "[REDACTED FINANCIAL DETAIL]",
   },
   {
     category: "phone",
@@ -31,7 +36,7 @@ const PII_PATTERNS: ReadonlyArray<{
 /** Replaces recognized contact details and introduced full names with placeholders. */
 export function redactPii(input: string): RedactionResult {
   let text = input;
-  const categories: Array<"email" | "phone" | "name"> = [];
+  const categories: Array<"email" | "phone" | "name" | "financial"> = [];
 
   for (const { category, pattern, replacement } of PII_PATTERNS) {
     pattern.lastIndex = 0;
