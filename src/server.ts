@@ -8,12 +8,14 @@ import { z } from "zod";
 import type {
   ChatApiRequest,
   ChatMessage,
+  ConciergeReply,
 } from "./types/concierge.js";
 import { ConciergeService, sanitizeHistory, unavailableReply } from "./services/concierge.js";
+import { getConversationalReply } from "./services/concierge.matchers.js";
 import { redactPii } from "./utils/piiScanner.js";
 
 const requestSchema = z.object({
-  message: z.string().min(1).max(4000),
+  message: z.string().trim().min(1).max(4000),
   history: z.object({
     messages: z.array(
       z.object({
@@ -108,14 +110,24 @@ async function handleChat(
     content: redactPii(item.content).text,
   }));
 
-  let result;
+  let result: ConciergeReply;
   try {
-    result = service === undefined
-      ? unavailableReply()
-      : await service.reply(
+    // Handle greetings and predictable social turns without Gemini.
+    const conversationalReply = getConversationalReply(
+      safeUserMessage.text,
+    );
+
+    if (conversationalReply !== undefined) {
+      result = conversationalReply;
+    } else if (service === undefined) {
+      // General AI answers still require a configured Gemini service.
+      result = unavailableReply("gemini_service_unavailable");
+    } else {
+      result = await service.reply(
         safeHistory,
         safeUserMessage.text,
       );
+    }
   } catch (error) {
     const status = error instanceof Error
       ? (error as Error & { status?: number }).status
@@ -128,7 +140,12 @@ async function handleChat(
     return;
   }
   const safeReply = redactPii(result.reply);
-  const finalResult = safeReply.redacted ? unavailableReply() : result;
+  const finalResult = safeReply.redacted
+    ? unavailableReply("model_reply_contained_sensitive_data", {
+      categories: safeReply.categories,
+      action: "replaced_model_reply_with_human_support_response",
+    })
+    : result;
   sendJson(response, 200, {
     safeUserMessage: safeUserMessage.text,
     piiRedacted: safeUserMessage.redacted || safeReply.redacted,
@@ -151,11 +168,11 @@ const service = geminiClient === undefined
     geminiClient,
     traineeFaq,
     volunteerFaq,
-    process.env["GEMINI_MODEL"] ?? "gemini-3.5-flash-lite",
+    process.env["GEMINI_MODEL"] ?? "gemini-3.8-flash",
   );
 
 if (service === undefined) {
-  console.warn("GEMINI_API_KEY is not set. Chat requests will use the human-support fallback.");
+  console.warn("GEMINI_API_KEY is not set. Greetings will work, but model-based answers will use the human-support fallback.");
 }
 
 // Route health checks, chat requests, and static page assets to their handlers.
