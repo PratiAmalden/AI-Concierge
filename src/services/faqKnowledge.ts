@@ -13,26 +13,22 @@ interface ScoredFaqEntry {
 	readonly score: number;
 }
 
-const STOP_WORDS = new Set([
-	"a", "about", "am", "an", "and", "are", "as", "at", "be", "can", "could",
-	"do", "does", "for", "from", "get", "how", "i", "if", "in", "is", "it",
-	"me", "my", "of", "on", "or", "the", "to", "what", "when", "where", "who",
-	"why", "with", "would", "you", "your",
-]);
-
 const SYNONYMS: Readonly<Record<string, readonly string[]>> = {
 	apply: ["join", "signup", "register"],
 	application: ["apply", "sign", "signup", "register"],
 	course: ["programme", "program", "training"],
 	cost: ["free", "price", "fee"],
 	help: ["support", "assist"],
+	home: ["remote", "online"],
 	join: ["apply", "signup", "register"],
 	leave: ["withdraw", "defer", "stop"],
 	location: ["region", "city", "area"],
+	online: ["remote", "virtual", "home"],
 	remote: ["online", "virtual", "home"],
 	salary: ["pay", "earn", "wage"],
 	sign: ["apply", "join", "signup", "register"],
 	signup: ["apply", "join", "register"],
+	support: ["help"],
 	time: ["hours", "commitment"],
 	volunteer: ["volunteering", "volunteers"],
 };
@@ -73,7 +69,7 @@ export function parseFaqMarkdown(markdown: string, source: FaqSource): FaqEntry[
 
 		const question = /^\s*-\s+\*\*(.+?)\*\*\s*$/.exec(line);
 		const questionText = question === null ? undefined : stripMarkdown(question[1] ?? "");
-		if (questionText !== undefined && isFaqQuestion(questionText)) {
+		if (questionText !== undefined) {
 			saveEntry();
 			activeQuestion = questionText;
 			activeQuestionSection = activeSection;
@@ -157,8 +153,7 @@ function isAmbiguousParticipationQuery(query: string): boolean {
 
 function tokenize(text: string): string[] {
 	return (text.toLowerCase().match(/[a-z0-9]+/g) ?? [])
-		.map(normalizeToken)
-		.filter((token) => token.length > 1 && !STOP_WORDS.has(token));
+		.map(normalizeToken);
 }
 
 function expandQueryTerms(tokens: readonly string[]): Map<string, number> {
@@ -226,7 +221,3 @@ function stripMarkdown(value: string): string {
 		.trim();
 }
 
-function isFaqQuestion(value: string): boolean {
-	return value.endsWith("?")
-		|| /^(i|we|you|what|when|where|who|why|how|can|could|do|does|is|are|will|should|would)\b/i.test(value);
-}
