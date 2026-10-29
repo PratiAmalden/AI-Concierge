@@ -30,7 +30,7 @@ if (apiKey === undefined || apiKey.length === 0) {
 }
 
 const client = new GoogleGenAI({ apiKey });
-const model = process.env["GEMINI_MODEL"] ?? "gemini-3.5-flash-lite";
+const model = process.env["GEMINI_MODEL"] ?? "gemini-3.8-flash";
 const documents: Readonly<Record<FaqSource, string>> = {
 	"Trainee FAQ.md": await readFile(join(root, "Trainee FAQ.md"), "utf8"),
 	"Volunteer FAQ.md": await readFile(join(root, "Volunteer FAQ.md"), "utf8"),

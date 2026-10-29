@@ -70,7 +70,7 @@ export class ConciergeService {
     client: GoogleGenAI,
     traineeFaq: string,
     volunteerFaq: string,
-    model = "gemini-3.5-flash-lite",
+    model = "gemini-3.8-flash",
   ) {
     this.client = client;
     this.faqEntries = [
