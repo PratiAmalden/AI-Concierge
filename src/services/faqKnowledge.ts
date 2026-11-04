@@ -31,6 +31,27 @@ const SYNONYMS: Readonly<Record<string, readonly string[]>> = {
 	support: ["help"],
 	time: ["hours", "commitment"],
 	volunteer: ["volunteering", "volunteers"],
+	cv: ["resume", "curriculum"],
+	travel: ["transport", "transportation", "bus", "train"],
+	transport: ["travel", "bus", "train"],
+	reimbursement: ["reimbursed", "reimburse", "repayment", "expense", "claim"],
+	reimbursed: ["reimbursement", "reimburse", "repayment", "expense", "claim"],
+	form: ["claim", "expense"],
+	laptop: ["computer", "device", "equipment", "loan", "borrow", "provided", "request"],
+	computer: ["laptop", "device", "equipment"],
+	tablet: ["ipad", "device", "computer"],
+	ipad: ["tablet", "device"],
+	specification: ["specifications", "spec", "requirements", "hardware", "minimum"],
+	broken: ["fault", "repair", "damaged", "stopped", "working"],
+	technical: ["tech", "IT", "support", "troubleshooting"],
+	childcare: ["child", "baby", "infant", "nursery", "babysitting", "registered provider"],
+	baby: ["child", "infant", "toddler"],
+	child: ["baby", "children", "childcare"],
+	expense: ["expenses", "reimbursement", "reimburse", "claim", "cost", "funding"],
+	claim: ["expense", "reimbursement"],
+	return: ["give back", "hand back", "post"],
+	graduation: ["graduate", "finish", "completion"],
+	request: ["apply", "ask", "obtain", "get"],
 };
 
 /** Extracts FAQ question-and-answer passages while retaining their section context. */
@@ -86,7 +107,7 @@ export function parseFaqMarkdown(markdown: string, source: FaqSource): FaqEntry[
 
 /** Ranks FAQ entries using lexical matching over headings, questions, and answer text. */
 export function searchFaqEntries(entries: readonly FaqEntry[], query: string, limit = 5): readonly FaqEntry[] {
-	const queries = splitQuery(query);
+	const queries = [...splitQuery(query), ...getDomainSearchQueries(query)];
 	if (isAmbiguousParticipationQuery(query)) {
 		queries.push("trainee course sign up", "volunteer start");
 	}
@@ -103,6 +124,39 @@ export function searchFaqEntries(entries: readonly FaqEntry[], query: string, li
 		.sort((first, second) => second.score - first.score)
 		.slice(0, Math.max(1, limit))
 		.map(({ entry }) => entry);
+}
+
+function getDomainSearchQueries(query: string): string[] {
+	const normalized = normalizeText(query);
+	const related: string[] = [];
+
+	if (/\b(laptop|computer|tablet|ipad)\b/.test(normalized)) {
+		if (/\b(need|own|access|join|course)\b/.test(normalized)) {
+			related.push("I do not have access to a computer or laptop can I still take this course");
+		}
+		if (/\b(spec|specification|requirement|minimum|hardware)\b/.test(normalized)) {
+			related.push("Laptop specification for the course");
+		}
+		if (/\b(request|provide|provided|get|borrow|loan)\b/.test(normalized)) {
+			related.push("I need a laptop for Intro to Programming how can I request it and what is the process");
+		}
+		if (/\b(return|keep|graduation|graduate|after)\b/.test(normalized)) {
+			related.push("How do I return my CYF laptop loan valid for 12 months");
+		}
+	}
+
+	if (/\b(childcare|child|baby|babies|expense|expenses|reimburse|reimbursement|travel|transport)\b/.test(normalized)) {
+		related.push("I need financial support with barriers transport childcare expenses paid first reimbursed claim within 30 days Pastoral team");
+		if (/\b(form|where|when|claim|reimburse|reimbursement)\b/.test(normalized)) {
+			related.push("expenses claim form trainee expense policy regional Slack canvas submit claim within 30 days");
+		}
+	}
+
+	if (/\b(cv|resume|curriculum)\b/.test(normalized)) {
+		related.push("How does CYF help me in my job search CV profile review interview preparation");
+	}
+
+	return related;
 }
 
 function rankFaqEntries(entries: readonly FaqEntry[], query: string, limit: number): readonly ScoredFaqEntry[] {
@@ -158,10 +212,12 @@ function tokenize(text: string): string[] {
 
 function expandQueryTerms(tokens: readonly string[]): Map<string, number> {
 	const expanded = new Map(tokens.map((token) => [normalizeToken(token), 1]));
-	for (const token of tokens) {
+	for (const rawToken of tokens) {
+		const token = normalizeToken(rawToken);
 		for (const synonym of SYNONYMS[token] ?? []) {
-			const normalized = normalizeToken(synonym);
-			if (!expanded.has(normalized)) expanded.set(normalized, 0.35);
+			for (const synonymToken of tokenize(synonym)) {
+				if (!expanded.has(synonymToken)) expanded.set(synonymToken, 0.35);
+			}
 		}
 	}
 	return expanded;
