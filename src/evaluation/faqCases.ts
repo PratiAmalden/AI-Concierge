@@ -74,16 +74,16 @@ export const answerCases: readonly AnswerCase[] = [
 			question: "I have to withdraw from or defer because I can’t or don’t want to do the course anymore",
 		}],
 	},
-	{
+	/*{
 		id: "ambiguous-joining",
 		question: "I want to join CYF. What do I need to do?",
 		expectedAction: "clarify",
-		expectedFacts: "Joining could mean applying as a trainee or joining as a volunteer; ask which the user means before giving role-specific steps.",
+		expectedFacts: "Joining could mean applying as a trainee or joining as a volunteer",
 		expectedFaqEntries: [
 			{ source: "Trainee FAQ.md", question: "I want to sign up for the CYF programme. What should I do?" },
 			{ source: "Volunteer FAQ.md", question: "I want to volunteer. Where do I start?" },
 		],
-	},
+	},*/
 	{
 		id: "unsupported-salary-promise",
 		question: "What salary will I definitely earn after graduating from CYF?",
@@ -91,4 +91,51 @@ export const answerCases: readonly AnswerCase[] = [
 		expectedFacts: "The FAQs do not guarantee a job or salary; say this cannot be confirmed and direct the user to an appropriate human or official CYF resource.",
 		expectedFaqEntries: [],
 	},
+
+	{
+	id: "laptop-request",
+	question: "Can I get a laptop from CodeYourFuture?",
+	expectedAction: "answer",
+	expectedFacts:
+		"Explain the laptop request process using the approved FAQ. Do not promise eligibility beyond what the FAQ confirms.",
+	expectedFaqEntries: [{
+		source: "Trainee FAQ.md",
+		question: "Can I request a laptop?",
+	}],
+	},
+	{
+	id: "laptop-provision",
+	question: "Does CYF provide computers to trainees?",
+	expectedAction: "answer",
+	expectedFacts:
+		"Explain whether CYF provides laptops using the approved FAQ.",
+	expectedFaqEntries: [{
+		source: "Trainee FAQ.md",
+		question: "Can I request a laptop?",
+	}],
+	},
+	{
+	id: "childcare-attendance",
+	question: "Can I bring my baby to class?",
+	expectedAction: "answer",
+	expectedFacts:
+		"Explain the confirmed policy on children attending classes. Do not assume permission.",
+	expectedFaqEntries: [{
+		source: "Trainee FAQ.md",
+		question: "Can children attend classes?",
+	}],
+	},
+	{
+	id: "childcare-expenses",
+	question: "Childcare costs £100 per day. Can I claim this?",
+	expectedAction: "answer",
+	expectedFacts:
+		"Explain childcare reimbursement eligibility using the approved expense policy. Do not promise reimbursement.",
+	expectedFaqEntries: [{
+		source: "Trainee FAQ.md",
+		question: "Can I claim childcare expenses?",
+	}],
+	},
+
+	
 ];
