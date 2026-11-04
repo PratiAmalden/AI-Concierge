@@ -12,7 +12,7 @@ import type {
 } from "./types/concierge.js";
 import { ConciergeService, sanitizeHistory, unavailableReply } from "./services/concierge.js";
 import { getConversationalReply } from "./services/concierge.matchers.js";
-import { redactPii } from "./utils/piiScanner.js";
+import { extractApprovedEmails, redactPii } from "./utils/piiScanner.js";
 
 const requestSchema = z.object({
   message: z.string().trim().min(1).max(4000),
@@ -139,7 +139,7 @@ async function handleChat(
     });
     return;
   }
-  const safeReply = redactPii(result.reply);
+  const safeReply = redactPii(result.reply, { allowedEmails: approvedFaqEmails });
   const finalResult = safeReply.redacted
     ? unavailableReply("model_reply_contained_sensitive_data", {
       categories: safeReply.categories,
@@ -162,6 +162,7 @@ const [traineeFaq, volunteerFaq] = await Promise.all([
   readFile(join(projectRoot, "Trainee FAQ.md"), "utf8"),
   readFile(join(projectRoot, "Volunteer FAQ.md"), "utf8"),
 ]);
+const approvedFaqEmails = extractApprovedEmails(`${traineeFaq}\n${volunteerFaq}`);
 const service = geminiClient === undefined
   ? undefined
   : new ConciergeService(
