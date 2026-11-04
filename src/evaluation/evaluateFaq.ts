@@ -79,7 +79,11 @@ for (const testCase of answerCases) {
 	CONCIERGE ANSWER:
 	${result.reply}
 
-	Score correctness as true only if the answer gives the expected supported facts, asks the necessary trainee-versus-volunteer clarification, or appropriately abstains as specified. Score groundedness as true only if every material factual claim is supported by the supplied context (or, for an abstention, it makes no unsupported CYF claims). Score abstentionQuality as true only if the answer action matches the expected action: answer for answer cases, ask a focused clarification for clarify cases, and abstain or hand off for abstain cases.`;
+	Score correctness as true only if the answer gives the expected supported facts,
+	asks the necessary trainee-versus-volunteer clarification, or appropriately abstains as specified.
+	Score groundedness as true only if every material factual claim is supported by the supplied context
+	Score abstentionQuality as true only if the answer action matches the expected action:
+	answer for answer cases, ask a focused clarification for clarify cases and abstain or hand off for abstain cases.`;
 	const response = await client.models.generateContent({
 		model,
 		contents: prompt,

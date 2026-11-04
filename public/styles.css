@@ -107,6 +107,33 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+.message > h3 {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.message > h3:first-of-type {
+  margin-top: 8px;
+}
+
+.message > ul,
+.message > ol {
+  display: grid;
+  gap: 5px;
+  margin: 8px 0 0;
+  padding-left: 22px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.message > ul + p,
+.message > ol + p,
+.message > p + ul,
+.message > p + ol {
+  margin-top: 12px;
+}
+
 .message-label {
   color: var(--muted);
   font-size: 10px;
@@ -136,6 +163,10 @@ textarea {
   display: flex;
   align-items: center;
   gap: 7px;
+}
+
+.typing-message > p {
+  margin-top: 6px;
 }
 
 .typing-dots {

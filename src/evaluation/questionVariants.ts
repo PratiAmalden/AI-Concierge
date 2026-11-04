@@ -27,7 +27,7 @@ export function createQuestionVariants(question: string, companionQuestion?: str
 		`Quick question, ${clean.toLowerCase()}?`,
 		`hey, ${clean.toLowerCase()}?`,
 		`${partial}...`,
-		`I'm asking about ${clean.toLowerCase()}; what should I do next?`,
+		`I'm asking about ${clean.toLowerCase()}; could you explain?`,
 		typo,
 		...(companionQuestion === undefined ? [] : [`${question} Also, ${companionQuestion}`]),
 	];
